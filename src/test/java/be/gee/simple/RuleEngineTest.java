@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class RuleEngineTest {
@@ -32,6 +33,18 @@ public class RuleEngineTest {
     public void findSpy() throws Exception {
         RuleEngine engine = new RuleEngine();
         engine.add(rule);
+        Set<String> actions = engine.getActions(context);
+        Assert.assertTrue(actions.contains("BOND"));
+    }
+
+    @Test
+    public void findSpyManyRules() throws Exception {
+        RuleEngine engine = new RuleEngine();
+        engine.add(rule);
+        for(int i =0;i<1000;i++){
+            engine.add(new Rule("user.telephone == '"+
+                    new Random().nextInt(200_000) +"'","WHATEVER"));
+        }
         Set<String> actions = engine.getActions(context);
         Assert.assertTrue(actions.contains("BOND"));
     }
