@@ -12,16 +12,16 @@ import java.util.Set;
 public class RuleEngineTest {
     Map<String, Object> context;
     Rule rule;
+    User user1;
 
     @Before
     public void setUpContext() throws Exception {
-    User user1;
         user1 = new User();
         user1.name = "James Bond";
         user1.department = "MI-6";
         user1.telephone = "confidential";
         context = new HashMap<>();
-        context.put("user",user1);
+        context.put("user", user1);
     }
 
     @Before
@@ -41,17 +41,36 @@ public class RuleEngineTest {
     public void findSpyManyRules() throws Exception {
         RuleEngine engine = new RuleEngine();
         engine.add(rule);
-        for(int i =0;i<1000;i++){
-            engine.add(new Rule("user.telephone == '"+
-                    new Random().nextInt(200_000) +"'","WHATEVER"));
+        for (int i = 0; i < 1000; i++) {
+            engine.add(new Rule("user.telephone == '" +
+                    new Random().nextInt(200_000) + "'", "WHATEVER"));
         }
         Set<String> actions = engine.getActions(context);
         Assert.assertTrue(actions.contains("BOND"));
     }
 
+    @Test
+    public void findSpyManyUsers() throws Exception {
+        RuleEngine engine = new RuleEngine();
+        engine.add(rule);
+        for (int i = 0; i < 1000; i++) {
+            engine.add(new Rule("user.telephone == '" +
+                    i + "'", "PHONE_" + i));
+        }
+        for (int i = 0; i < 1000; i=i+3) {
+            user1.telephone = "" + i;
+            Set<String> actions = engine.getActions(context);
+            Assert.assertTrue(actions.contains("PHONE_"+i));
+        }
+    }
+
     public class User
 
     {
+        String name;
+        String department;
+        String telephone;
+
         public String getName() {
             return name;
         }
@@ -63,9 +82,5 @@ public class RuleEngineTest {
         public String getTelephone() {
             return telephone;
         }
-
-        String name;
-        String department;
-        String telephone;
     }
 }
